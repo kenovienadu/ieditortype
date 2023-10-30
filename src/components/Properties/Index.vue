@@ -106,6 +106,7 @@
     }
   };
 
+
   const removeElement = (): void => {
     if (data.value) {
       const layout = document.getElementById("layout");
