@@ -31,9 +31,9 @@
   import PaddingBorderProperties from "./PaddingBorderProperties.vue";
   import { HtmlTags } from "@/typings/enums";
 
-  const props = defineProps({
-    element: HTMLElement,
-  });
+  const props = defineProps<{
+    element: HTMLElement | null
+  }>();
 
   const watchElement = computed(() => props.element);
 

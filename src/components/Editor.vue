@@ -46,8 +46,10 @@ const onDrop = (e: DragEvent) => {
 
   // Position the element relative the mouse position
   const layoutRect = layout && layout.getBoundingClientRect();
-  const offsetX = e.clientX - layoutRect.left - leftCorrection.value;
-  const offsetY = e.clientY - layoutRect.top - topCorrection.value;
+  const rectLeft = layoutRect?.left || 0;
+  const rectTop = layoutRect?.top || 0;
+  const offsetX = e.clientX - rectLeft - leftCorrection.value;
+  const offsetY = e.clientY - rectTop - topCorrection.value;
 
   data.style.left = offsetX + "px";
   data.style.top = offsetY + "px";
@@ -74,7 +76,7 @@ const onDrop = (e: DragEvent) => {
 const addDefaultStyles = (el: HTMLElement, type: string) => {
   // console.log(el, type);
 
-  const defaultStyles = {
+  const defaultStyles: Record<string, any> = {
     Button: {
       padding: "10px 20px",
       color: "#ffff",
@@ -121,7 +123,7 @@ const addDefaultStyles = (el: HTMLElement, type: string) => {
   const styles = defaultStyles[type];
   if (styles) {
     for (const prop in styles) {
-      el.style[prop] = styles[prop];
+      el.style.setProperty(prop, styles[prop])
     }
   }
 
@@ -130,7 +132,7 @@ const addDefaultStyles = (el: HTMLElement, type: string) => {
   }
 };
 
-const selectedElement = (e) => {
+const selectedElement = (e: Event & any) => {
   const clickedElement = e.target;
   if (activeElement.value && activeElement.value !== clickedElement) {
     activeElement.value.classList.remove("selected");
@@ -139,7 +141,7 @@ const selectedElement = (e) => {
   clickedElement.classList.add("selected");
 };
 
-const startDrag = (e) => {
+const startDrag = (e: Event & any) => {
   draggingElement.value = e.target;
   const data = {
     type: e.target.getAttribute("type"),
@@ -149,7 +151,7 @@ const startDrag = (e) => {
   e.dataTransfer.setData("element", JSON.stringify(data));
 };
 
-const trackmouse = (e) => {
+const trackmouse = (e: Event & any) => {
   if (e.target.id !== "layout") {
     leftCorrection.value = e.offsetX;
     topCorrection.value = e.offsetY;
