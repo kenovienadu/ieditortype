@@ -10,7 +10,7 @@
     class="w-8 h-8 hover:border-[#a670ff]"
     type="color"
     id="colorPicker"
-    @input="updateProperty('background', $event)"
+    @input="updateBackground($event)"
     v-model="properties.background"
   />
 
@@ -22,7 +22,7 @@
       <span
         @click="updatePosition('backward')"
         :class="
-          properties.zIndex == 1
+          properties.zIndex === 1
             ? 'cursor-not-allowed text-gray-400'
             : 'cursor-pointer text-[#a670ff]'
         "
@@ -48,18 +48,29 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, reactive, ref, watch, Ref, PropType } from "vue";
+import { onMounted, computed, reactive, ref, watch, Ref } from "vue";
 
-const props = defineProps({
-  element: Object as PropType<HTMLElement>,
-  showProperties: Object,
-});
+type Properties = {
+  textField: string,
+  background: string,
+  zIndex: number,
+  [key: string]: any
+}
+
+type AnyEvent = Event & {
+  currentTarget?: any
+}
+
+const props = defineProps<{
+  element: HTMLElement,
+  showProperties: Record<string, boolean>,
+}>()
 
 const togglePosition = ref(false);
 
 const data: Ref<HTMLElement | null> = ref(null);
 
-const properties = reactive({
+const properties = reactive<Properties>({
   textField: <string>"",
   background: <string>"",
   zIndex: <number>1,
@@ -82,7 +93,7 @@ const setProperty = () => {
   data.value = props.element;
 
   properties.background = data.value.style.background;
-  properties.zIndex = parseInt(data.value.style.zIndex, 10) || 1;
+  properties.zIndex = parseInt(data?.value?.style?.zIndex, 10) || 1;
 
   properties.textField =
     data.value instanceof HTMLInputElement
@@ -90,16 +101,16 @@ const setProperty = () => {
       : data.value.innerText;
 };
 
-const updateTextField = () => {
+const updateTextField = (): void => {
   if (!data.value) return;
   if (data.value instanceof HTMLInputElement) {
-    data.value.placeholder = properties.textField;
+    data.value.placeholder = properties.textField as string;
   } else {
-    data.value.innerText = properties.textField;
+    data.value.innerText = properties.textField as string;
   }
 };
 
-const updatePosition = (arg: string) => {
+const updatePosition = (arg: 'backward' | 'forward'): void => {
   if (!data.value) return;
   if (arg == "backward" && properties.zIndex > 1) {
     properties.zIndex--;
@@ -109,10 +120,10 @@ const updatePosition = (arg: string) => {
   data.value.style.zIndex = String(properties.zIndex);
 };
 
-const updateProperty = (property: any, e: Event) => {
+const updateBackground = (e: AnyEvent ) => {
   if (!data.value) return;
-  (properties as any)[property] = (e.target as HTMLInputElement).value;
-  data.value.style[property] = (properties as any)[property];
+  properties.background = e.currentTarget?.value as string;
+  data.value.style.background = properties.background;
 };
 </script>
 

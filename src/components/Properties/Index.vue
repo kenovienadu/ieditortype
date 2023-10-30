@@ -23,93 +23,96 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, Ref, PropType, reactive, watch } from "vue";
+  import { computed, onMounted, ref, Ref, reactive, watch } from "vue";
 
-import GlobalProperties from "./GlobalProperties.vue";
-import TextProperties from "./TextProperties.vue";
-import SizeProperties from "./SizeProperties.vue";
-import PaddingBorderProperties from "./PaddingBorderProperties.vue";
+  import GlobalProperties from "./GlobalProperties.vue";
+  import TextProperties from "./TextProperties.vue";
+  import SizeProperties from "./SizeProperties.vue";
+  import PaddingBorderProperties from "./PaddingBorderProperties.vue";
+  import { HtmlTags } from "@/typings/enums";
 
-const props = defineProps({
-  element: Object as PropType<HTMLElement>,
-});
-const watchElement = computed(() => props.element);
+  const props = defineProps({
+    element: HTMLElement,
+  });
 
-const showProperties = reactive({
-  background: true,
-  color: true,
-  border: true,
-  font: true,
-  textField: true,
-  padding: true,
-  size: true,
-});
+  const watchElement = computed(() => props.element);
 
-const data: Ref<HTMLElement | null> = ref(null);
+  const showProperties: Record<string, boolean> = reactive({
+    background: true,
+    color: true,
+    border: true,
+    font: true,
+    textField: true,
+    padding: true,
+    size: true,
+  });
 
-watch(watchElement, () => {
-  if (props.element) {
+  const data: Ref<HTMLElement | null> = ref(null);
+
+  watch(watchElement, () => {
     setProperty();
-  }
-});
+  });
 
-onMounted(() => {
-  if (props.element) {
+  onMounted(() => {
     setProperty();
+  });
+
+  const setAllProperties = (value: boolean): void => {
+    const properties = Object.keys(showProperties);
+    properties.forEach((key) => showProperties[key] = value);
   }
-});
 
-const setProperty = () => {
-  if (!props.element) return;
+  const setProperty = (): void => {
+    if (!props.element) return;
 
-  data.value = props.element;
-  const tag = data.value.tagName;
+    data.value = props.element;
+    setAllProperties(true);
 
-  (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
-    (key) => {
-      showProperties[key] = true;
+    switch(props.element.tagName) {
+      case HtmlTags.DIV:
+        showProperties.font = false;
+        showProperties.textField = false;
+        showProperties.color = false;
+
+        //Show the padding and margin properties if it's the layout
+        showProperties.padding = data.value.id !== "layout";
+        break;
+
+      case HtmlTags.PARAGRAPH:
+        //Text
+        showProperties.background = false;
+        showProperties.border = false;
+        showProperties.padding = false;
+        break;
+      
+      case HtmlTags.H4:
+        //Text
+        showProperties.background = false;
+        showProperties.border = false;
+        showProperties.padding = false;
+        break;
+      
+      case HtmlTags.ICON:
+        // Icon
+        setAllProperties(false);
+        showProperties.color = true;
+        showProperties.font = true;
+        break;
+
+      case HtmlTags.IMG:
+        setAllProperties(false);
+        showProperties.size = true;
+        break;
     }
-  );
+  };
 
-  if (tag == "DIV") {
-    // Shape
-    showProperties.font = false;
-    showProperties.textField = false;
-    showProperties.color = false;
-
-    //Show the padding and margin properties if it's the layout
-    showProperties.padding = data.value.id !== "layout";
-  } else if (tag == "P" || tag == "H4") {
-    //Text
-    showProperties.background = false;
-    showProperties.border = false;
-    showProperties.padding = false;
-  } else if (tag == "I") {
-    // Icon
-    (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
-      (key) => {
-        showProperties[key] = false;
-      }
-    );
-    showProperties.color = true;
-    showProperties.font = true;
-  } else if (tag == "IMG") {
-    (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
-      (key) => {
-        showProperties[key] = false;
-      }
-    );
-    showProperties.size = true;
-  }
-};
-
-const removeElement = () => {
-  if (data.value) {
-    const layout = document.getElementById("layout");
-    layout && layout.removeChild(data.value);
-    data.value = null;
-  }
-};
+  const removeElement = (): void => {
+    if (data.value) {
+      const layout = document.getElementById("layout");
+      layout?.removeChild(data.value);
+      data.value = null;
+    }
+  };
 </script>
 
 <style></style>
