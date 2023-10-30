@@ -161,6 +161,7 @@ const setTemplate = () => {
   let template = saved ? JSON.parse(saved) : null;
 
   if (!container.value) return;
+
   container.value.innerHTML = template
     ? template.element
     : defaultTemplates.value;
