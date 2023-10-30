@@ -23,19 +23,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, Ref, PropType, reactive, watch } from "vue";
+import { computed, onMounted, ref, Ref, reactive, watch } from "vue";
 
 import GlobalProperties from "./GlobalProperties.vue";
 import TextProperties from "./TextProperties.vue";
 import SizeProperties from "./SizeProperties.vue";
 import PaddingBorderProperties from "./PaddingBorderProperties.vue";
 
+import { HTMLTags } from "@/typings/enums";
+
 const props = defineProps({
-  element: Object as PropType<HTMLElement>,
+  element: HTMLElement,
 });
+
 const watchElement = computed(() => props.element);
 
-const showProperties = reactive({
+const showProperties: Record<string, boolean> = reactive({
   background: true,
   color: true,
   border: true,
@@ -65,13 +68,14 @@ const setProperty = () => {
   data.value = props.element;
   const tag = data.value.tagName;
 
-  (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
-    (key) => {
-      showProperties[key] = true;
-    }
-  );
+  // const properties
+  // (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
+  //   (key) => {
+  //     showProperties[key] = true;
+  //   }
+  // );
 
-  if (tag == "DIV") {
+  if (tag === HTMLTags.DIV) {
     // Shape
     showProperties.font = false;
     showProperties.textField = false;
@@ -79,12 +83,12 @@ const setProperty = () => {
 
     //Show the padding and margin properties if it's the layout
     showProperties.padding = data.value.id !== "layout";
-  } else if (tag == "P" || tag == "H4") {
+  } else if (tag === HTMLTags.P || tag === HTMLTags.H4) {
     //Text
     showProperties.background = false;
     showProperties.border = false;
     showProperties.padding = false;
-  } else if (tag == "I") {
+  } else if (tag === HTMLTags.I) {
     // Icon
     (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
       (key) => {
@@ -93,7 +97,7 @@ const setProperty = () => {
     );
     showProperties.color = true;
     showProperties.font = true;
-  } else if (tag == "IMG") {
+  } else if (tag === HTMLTags.IMG) {
     (Object.keys(showProperties) as (keyof typeof showProperties)[]).forEach(
       (key) => {
         showProperties[key] = false;
